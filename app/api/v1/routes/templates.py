@@ -3,114 +3,244 @@ from sqlalchemy.orm import Session
 from uuid import UUID, uuid4
 from pathlib import Path
 import shutil
+import re
 from datetime import datetime
 
 from app.database.session import get_db
-from app.services.template_service import TemplateService
-from app.services.placeholder_extractor import PlaceholderExtractor
-from app.schemas.template_schema import TemplateSchemaResponse, TemplateUploadResponse
 from app.models.template import Template
 from app.models.template_field import TemplateField
 from app.config import settings
 
 router = APIRouter()
 
-# Existing GET endpoint
+
+# ============ GET ALL TEMPLATES ============
+@router.get("/")
+def list_templates(db: Session = Depends(get_db)):
+    templates = db.query(Template).filter(Template.is_active == True).all()
+    return [
+        {
+            "id": str(t.id),
+            "name": t.name,
+            "description": t.description,
+            "template_type": t.template_type
+        }
+        for t in templates
+    ]
+
+
+# ============ GET TEMPLATE SCHEMA (for form) ============
 @router.get("/{template_id}/schema")
 def get_template_schema(template_id: UUID, db: Session = Depends(get_db)):
-    service = TemplateService(db)
-    schema = service.get_template_schema(template_id)
-    if not schema:
+    fields = db.query(TemplateField).filter(
+        TemplateField.template_id == template_id
+    ).order_by(TemplateField.display_order).all()
+    
+    template = db.query(Template).filter(Template.id == template_id).first()
+    if not template:
         raise HTTPException(status_code=404, detail="Template not found")
-    return schema
+    
+    return {
+        "template_id": template_id,
+        "template_name": template.name,
+        "fields": [
+            {
+                "name": f.placeholder_name,
+                "label": f.field_label,
+                "type": f.field_type,
+                "required": f.is_required,
+                "options": f.options
+            }
+            for f in fields
+        ]
+    }
 
-# ========== NEW: Upload Template API ==========
-@router.post("/upload", response_model=TemplateUploadResponse)
+
+# ============ GET TEMPLATE CONTENT (for Panel 1 & 2) ============
+@router.get("/{template_id}/content")
+def get_template_content(template_id: UUID, db: Session = Depends(get_db)):
+    template = db.query(Template).filter(Template.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    content = ""
+    
+    if template.template_type == "html" and template.html_template_path:
+        file_path = Path(template.html_template_path)
+        if file_path.exists():
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+    elif template.template_type == "docx" and template.docx_template_path:
+        content = f"DOCX Template: {template.name}\n\nPlaceholders found in this template.\nUse the form to generate documents."
+    elif template.raw_content:
+        content = template.raw_content
+    
+    return {
+        "template_id": template_id,
+        "name": template.name,
+        "template_type": template.template_type,
+        "content": content
+    }
+
+
+# ============ UPDATE TEMPLATE CONTENT (Save from Panel 2) ============
+@router.put("/{template_id}/content")
+def update_template_content(
+    template_id: UUID,
+    request: dict,
+    db: Session = Depends(get_db)
+):
+    new_content = request.get("content", "")
+    template = db.query(Template).filter(Template.id == template_id).first()
+    
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    if template.template_type == "html" and template.html_template_path:
+        file_path = Path(template.html_template_path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+    else:
+        template.raw_content = new_content
+    
+    template.updated_at = datetime.now()
+    db.commit()
+    
+    return {
+        "message": "Template content updated successfully",
+        "template_id": template_id,
+        "updated_at": template.updated_at.isoformat()
+    }
+
+
+# ============ UPLOAD DOCX TEMPLATE ============
+@router.post("/upload")
 async def upload_template(
     name: str = Form(...),
     description: str = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    """
-    Upload a DOCX template file.
-    System will:
-    1. Save the file
-    2. Extract all {{placeholders}}
-    3. Create template record in database
-    4. Create field records for each placeholder
-    """
-    
-    # 1. Validate file type
     if not file.filename.endswith('.docx'):
         raise HTTPException(status_code=400, detail="Only .docx files are allowed")
     
-    # 2. Create unique filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     unique_filename = f"{timestamp}_{file.filename}"
     template_path = Path(settings.TEMPLATE_DOCX_DIR) / unique_filename
+    template_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # 3. Save uploaded file
-    try:
-        with open(template_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    with open(template_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
     
-    # 4. Extract placeholders from DOCX
-    try:
-        placeholders = PlaceholderExtractor.extract_placeholders(str(template_path))
-    except Exception as e:
-        # Clean up file if extraction fails
-        template_path.unlink()
-        raise HTTPException(status_code=400, detail=f"Failed to extract placeholders: {str(e)}")
+    from docxtpl import DocxTemplate
+    doc = DocxTemplate(template_path)
+    xml = doc.get_xml()
+    placeholders = re.findall(r'\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}', xml)
+    unique_placeholders = list(dict.fromkeys(placeholders))
     
-    # 5. Generate field schema
-    fields_schema = PlaceholderExtractor.generate_field_schema(placeholders)
-    
-    # 6. Create template record in database
     template = Template(
         id=uuid4(),
         name=name,
         description=description,
         docx_template_path=f"app/templates/docx/{unique_filename}",
+        template_type="docx",
         is_active=True
     )
     db.add(template)
-    db.flush()  # Get template.id
+    db.flush()
     
-    # 7. Create field records
-    for field in fields_schema:
+    for idx, placeholder in enumerate(unique_placeholders):
+        label = placeholder.replace('_', ' ').title()
+        field_type = "text"
+        if "date" in placeholder.lower():
+            field_type = "date"
+        elif "email" in placeholder.lower():
+            field_type = "email"
+        
         template_field = TemplateField(
             id=uuid4(),
             template_id=template.id,
-            placeholder_name=field["placeholder_name"],
-            field_label=field["field_label"],
-            field_type=field["field_type"],
-            is_required=field["is_required"],
-            display_order=field["display_order"]
+            placeholder_name=placeholder,
+            field_label=label,
+            field_type=field_type,
+            is_required=True,
+            display_order=idx + 1
         )
         db.add(template_field)
     
     db.commit()
     
-    return TemplateUploadResponse(
-        template_id=template.id,
+    return {
+        "template_id": template.id,
+        "name": name,
+        "template_type": "docx",
+        "fields_found": unique_placeholders,
+        "message": f"DOCX template uploaded successfully. Found {len(unique_placeholders)} placeholders."
+    }
+
+
+# ============ UPLOAD HTML TEMPLATE ============
+@router.post("/upload-html")
+async def upload_html_template(
+    name: str = Form(...),
+    description: str = Form(None),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    if not file.filename.endswith('.html'):
+        raise HTTPException(status_code=400, detail="Only .html files are allowed")
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = f"{timestamp}_{file.filename}"
+    template_path = Path(settings.TEMPLATE_HTML_DIR) / unique_filename
+    template_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(template_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    with open(template_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    placeholders = re.findall(r'\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}', html_content)
+    unique_placeholders = list(dict.fromkeys(placeholders))
+    
+    template = Template(
+        id=uuid4(),
         name=name,
-        fields_found=placeholders,
-        message=f"Template uploaded successfully. Found {len(placeholders)} placeholders."
+        description=description,
+        html_template_path=f"app/templates/html/{unique_filename}",
+        template_type="html",
+        is_active=True
     )
-
-
-# Get all templates (for dropdown)
-@router.get("/")
-def list_templates(db: Session = Depends(get_db)):
-    templates = db.query(Template).filter(Template.is_active == True).all()
-    return [
-        {
-            "id": t.id,
-            "name": t.name,
-            "description": t.description
-        }
-        for t in templates
-    ]
+    db.add(template)
+    db.flush()
+    
+    for idx, placeholder in enumerate(unique_placeholders):
+        label = placeholder.replace('_', ' ').title()
+        field_type = "text"
+        if "date" in placeholder.lower():
+            field_type = "date"
+        elif "email" in placeholder.lower():
+            field_type = "email"
+        
+        template_field = TemplateField(
+            id=uuid4(),
+            template_id=template.id,
+            placeholder_name=placeholder,
+            field_label=label,
+            field_type=field_type,
+            is_required=True,
+            display_order=idx + 1
+        )
+        db.add(template_field)
+    
+    db.commit()
+    
+    return {
+        "template_id": template.id,
+        "name": name,
+        "template_type": "html",
+        "fields_found": unique_placeholders,
+        "message": f"HTML template uploaded successfully. Found {len(unique_placeholders)} placeholders."
+    }

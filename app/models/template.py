@@ -10,6 +10,8 @@ class Template(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(200), nullable=False)
     description = Column(Text)
-    docx_template_path = Column(String(500))
+    docx_template_path = Column(String(500), nullable=True)
+    html_template_path = Column(String(500), nullable=True)
+    template_type = Column(String(20), default="docx")  # "docx" or "html"
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

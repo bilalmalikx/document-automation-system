@@ -1,33 +1,19 @@
-from pydantic import BaseModel
-from typing import List, Optional
-from uuid import UUID
+from sqlalchemy import Column, String, Text, DateTime, Boolean
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
+from app.database.session import Base
+import uuid
 
-class FieldSchema(BaseModel):
-    name: str
-    label: str
-    type: str
-    required: bool = True
-
-class TemplateSchemaResponse(BaseModel):
-    template_id: UUID
-    template_name: str
-    fields: List[FieldSchema]
-
-class TemplateCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-class TemplateResponse(BaseModel):
-    id: UUID
-    name: str
-    description: Optional[str] = None
+class Template(Base):
+    __tablename__ = "templates"
     
-    class Config:
-        from_attributes = True
-
-# New: Upload response
-class TemplateUploadResponse(BaseModel):
-    template_id: UUID
-    name: str
-    fields_found: List[str]
-    message: str
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(200), nullable=False)
+    description = Column(Text)
+    docx_template_path = Column(String(500), nullable=True)
+    html_template_path = Column(String(500), nullable=True)
+    template_type = Column(String(20), default="docx")
+    raw_content = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
