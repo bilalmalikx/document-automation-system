@@ -1,0 +1,70 @@
+<div class="app-container">
+  <app-header (templateSelected)="onTemplateSelected($event)" />
+  
+  <div class="panel-tabs">
+    <div class="ptab ptab1" [class.loaded]="content()">
+      <div class="ptab-num">01</div>
+      <div class="ptab-info">
+        <div class="ptab-title">Current Template</div>
+        <div class="ptab-sub">Read only</div>
+      </div>
+      <span class="ptab-badge badge-ro">Readonly</span>
+    </div>
+    <div class="ptab ptab2" [class.loaded]="content()">
+      <div class="ptab-num">02</div>
+      <div class="ptab-info">
+        <div class="ptab-title">HTML Editor</div>
+        <div class="ptab-sub">Editable</div>
+      </div>
+      <span class="ptab-badge badge-ed">Editable</span>
+    </div>
+    <div class="ptab ptab3" [class.loaded]="content()">
+      <div class="ptab-num">03</div>
+      <div class="ptab-info">
+        <div class="ptab-title">Live Preview</div>
+        <div class="ptab-sub">Auto-renders</div>
+      </div>
+      <span class="ptab-badge badge-live">● Live</span>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- ✅ FIXED: Use correct selectors -->
+    <app-panel1-current [content]="content()" />
+    <app-panel2-editor 
+      [content]="content()" 
+      (contentChange)="onEditorChange($event)"
+      (placeholdersChange)="onPlaceholdersChange($event)" />
+    <app-panel3-preview [content]="editorContent()" [placeholders]="placeholders()" />
+  </div>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="footer-stat">
+        <span>{{ charCount() }}</span>
+        <span>chars</span>
+      </div>
+      <div class="footer-stat">
+        <span>{{ lineCount() }}</span>
+        <span>lines</span>
+      </div>
+      <div class="ph-counter" [class.show]="placeholders().length">
+        <span>⬡</span>
+        <span>{{ placeholders().length }}</span>
+        <span>placeholders</span>
+      </div>
+    </div>
+    <div class="footer-right">
+      <button class="btn btn-save" (click)="saveChanges()" [disabled]="!templateId() || saving()">
+        <span class="btn-ico">{{ saving() ? '⏳' : '💾' }}</span>
+        <span class="btn-lbl">{{ saving() ? 'Saving...' : 'Save Changes' }}</span>
+      </button>
+      <button class="btn btn-gen" (click)="generateDocument()" [disabled]="!templateId() || generating()">
+        <span class="btn-ico">{{ generating() ? '⏳' : '⚡' }}</span>
+        <span class="btn-lbl">{{ generating() ? 'Generating...' : 'Generate Document' }}</span>
+      </button>
+    </div>
+  </footer>
+  
+  <app-toast />
+</div>

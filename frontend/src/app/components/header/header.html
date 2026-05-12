@@ -1,0 +1,29 @@
+<div class="header">
+  <div class="header-brand">
+    <div class="brand-icon">⬡</div>
+    <span class="brand-name">Doc<em>Forge</em></span>
+    <span class="brand-version">v2.0</span>
+  </div>
+
+  <div class="header-middle">
+    <div class="sel-wrap">
+      <span class="sel-label">Template</span>
+      <div class="sel-outer">
+        <select class="tpl-select" [(ngModel)]="selectedTemplateId" (change)="onTemplateChange()">
+          <option value="">— Choose a template —</option>
+          <option *ngFor="let t of templates()" [value]="t.id">
+            {{ t.name }} [{{ t.template_type }}]
+          </option>
+        </select>
+      </div>
+      <div class="ring" [class.on]="loading()"></div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="status-pill" [class.ok]="status() === 'ok'" [class.err]="status() === 'err'" [class.busy]="status() === 'busy'">
+      <div class="status-dot"></div>
+      <span>{{ statusMessage() }}</span>
+    </div>
+  </div>
+</div>

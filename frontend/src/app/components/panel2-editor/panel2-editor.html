@@ -1,0 +1,23 @@
+<div class="panel panel2">
+  <div class="line-nums">
+    @for (num of lineNumbers(); track num) {
+      <div class="line-num">{{ num }}</div>
+    }
+  </div>
+  <textarea #editor class="code-area" [(ngModel)]="editorContent" (ngModelChange)="onContentChange()" spellcheck="false" placeholder="// Select a template to start editing"></textarea>
+  
+  @if (!content()) {
+    <div class="panel-empty">
+      <div class="empty-icon">✏️</div>
+      <div class="empty-txt">Editor ready — select template</div>
+    </div>
+  }
+  
+  @if (placeholders().length) {
+    <div class="ph-strip show">
+      @for (ph of placeholders(); track ph) {
+        <span class="ph-tag">{{ ph }}</span>
+      }
+    </div>
+  }
+</div>

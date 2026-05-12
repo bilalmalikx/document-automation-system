@@ -1,0 +1,26 @@
+<div class="panel3">
+  <div class="preview-toolbar">
+    <span class="preview-url">{{ previewUrl() }}</span>
+    <div class="preview-refresh" (click)="forceRefresh()" title="Refresh preview">
+      ↻
+    </div>
+  </div>
+  <div class="preview-wrap">
+    <iframe #previewFrame class="preview-frame" title="Live Preview" sandbox="allow-same-origin allow-scripts"></iframe>
+    
+    @if (loading()) {
+      <div class="prev-overlay">
+        <div class="prev-ring"></div>
+        <div class="prev-overlay-msg">Rendering preview...</div>
+      </div>
+    }
+    
+    @if (!content() && !loading()) {
+      <div class="preview-empty">
+        <div class="preview-empty-ring">🖥</div>
+        <div class="preview-empty-txt">Live Preview</div>
+        <div class="preview-empty-sub">Select a template to begin</div>
+      </div>
+    }
+  </div>
+</div>
