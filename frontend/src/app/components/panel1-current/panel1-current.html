@@ -1,10 +1,24 @@
-<div class="panel panel1">
-  <div class="line-nums">
-    <div *ngFor="let num of lineNumbers()" class="line-num">{{ num }}</div>
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <div class="dot"></div>
+      Original Template
+    </div>
   </div>
-  <textarea class="code-area" [value]="content()" readonly spellcheck="false" placeholder="// Select a template to view source"></textarea>
-  <div class="panel-empty" [class.hidden]="content()">
-    <div class="empty-icon">📄</div>
-    <div class="empty-txt">No template selected</div>
+  <div class="panel-body">
+    <div class="editor-wrap">
+      <div class="line-numbers">
+        @for (num of lineNumbers(); track num) {
+          <span>{{ num }}</span>
+        }
+      </div>
+      <textarea class="editor-textarea" [value]="content()" readonly placeholder="Select a template to view..."></textarea>
+    </div>
+    @if (!content()) {
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <p>No template selected</p>
+      </div>
+    }
   </div>
 </div>

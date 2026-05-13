@@ -1,7 +1,12 @@
-<div class="toasts">
-  @for (toast of toastService.getToasts()(); track toast.id) {
+<div class="toast-container">
+  @for (toast of getToasts(); track toast.id) {
     <div class="toast" [class]="toast.type">
-      <span class="toast-ic">{{ toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : toast.type === 'warn' ? '⚠' : '◆' }}</span>
+      <span class="toast-icon">
+        @if (toast.type === 'success') { ✓ }
+        @else if (toast.type === 'error') { ✕ }
+        @else if (toast.type === 'warn') { ⚠ }
+        @else { ◆ }
+      </span>
       <span>{{ toast.message }}</span>
     </div>
   }

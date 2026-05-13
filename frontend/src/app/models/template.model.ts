@@ -1,7 +1,7 @@
 export interface Template {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   template_type: 'docx' | 'html';
 }
 
@@ -21,7 +21,7 @@ export interface TemplateSchema {
 export interface TemplateField {
   name: string;
   label: string;
-  type: 'text' | 'date' | 'number' | 'email' | 'select';
+  type: 'text' | 'date' | 'email' | 'number' | 'select';
   required: boolean;
   options?: string[];
 }

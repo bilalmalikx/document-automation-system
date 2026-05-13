@@ -12,7 +12,7 @@ export class ToastService {
   private counter = 0;
 
   getToasts() {
-    return this.toasts.asReadonly();
+    return this.toasts;
   }
 
   show(message: string, type: ToastMessage['type'] = 'info') {
@@ -20,10 +20,24 @@ export class ToastService {
     const toast: ToastMessage = { id, message, type };
     this.toasts.update(list => [...list, toast]);
 
-    setTimeout(() => this.remove(id), 4000);
+    setTimeout(() => {
+      this.toasts.update(list => list.filter(t => t.id !== id));
+    }, 4000);
   }
 
-  remove(id: number) {
-    this.toasts.update(list => list.filter(t => t.id !== id));
+  success(message: string) {
+    this.show(message, 'success');
+  }
+
+  error(message: string) {
+    this.show(message, 'error');
+  }
+
+  info(message: string) {
+    this.show(message, 'info');
+  }
+
+  warn(message: string) {
+    this.show(message, 'warn');
   }
 }

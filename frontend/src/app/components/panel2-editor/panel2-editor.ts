@@ -1,12 +1,12 @@
 import { Component, input, output, computed, signal, effect, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-panel2-editor',
-  standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './panel2-editor.html',
-  styleUrls: ['./panel2-editor.css']
+  styleUrl: './panel2-editor.css',
 })
 export class Panel2Editor {
   @ViewChild('editor') editorRef!: ElementRef<HTMLTextAreaElement>;

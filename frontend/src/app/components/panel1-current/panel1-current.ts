@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-panel1-current',
   imports: [CommonModule],
   templateUrl: './panel1-current.html',
-  styleUrl: './panel1-current.css',
+  styleUrl: './panel1-current.css'
 })
 export class Panel1Current {
   content = input<string>('');

@@ -26,3 +26,7 @@ export interface UpdateContentResponse {
   template_id: string;
   updated_at: string;
 }
+
+export interface PreviewResponse {
+  rendered_html: string;
+}

@@ -7,12 +7,13 @@ import { Panel3Preview } from '../../components/panel3-preview/panel3-preview';
 import { Toast } from '../../components/toast/toast';
 import { ApiService } from '../../services/api';
 import { ToastService } from '../../services/toast';
+import { GenerateModal } from '../../components/generate-modal/generate-modal';
 
 @Component({
   selector: 'app-document-editor',
-  imports: [CommonModule, Header, Panel1Current, Panel2Editor, Panel3Preview, Toast],
+  imports: [CommonModule, Header, Panel1Current, Panel2Editor, Panel3Preview, Toast, GenerateModal],
   templateUrl: './document-editor.html',
-  styleUrl: './document-editor.css',
+  styleUrl: './document-editor.css'
 })
 export class DocumentEditor {
   private api = inject(ApiService);
@@ -24,6 +25,7 @@ export class DocumentEditor {
   placeholders = signal<string[]>([]);
   saving = signal(false);
   generating = signal(false);
+  showGenerateModal = signal(false);
   charCount = signal(0);
   lineCount = signal(0);
   
@@ -38,27 +40,26 @@ export class DocumentEditor {
         this.content.set(res.content);
         this.editorContent.set(res.content);
         this.updateStats(res.content);
-        this.toast.show('Template loaded successfully', 'success');
+        this.toast.success('Template loaded');
       },
       error: () => {
-        this.toast.show('Failed to load template', 'error');
+        this.toast.error('Failed to load template');
       }
     });
   }
   
-  onEditorChange(newContent: string) {
-    this.editorContent.set(newContent);
-    this.updateStats(newContent);
+  onEditorChange(content: string) {
+    this.editorContent.set(content);
+    this.updateStats(content);
   }
   
-  // ✅ FIXED: Accept string array directly
   onPlaceholdersChange(phs: string[]) {
     this.placeholders.set(phs);
   }
   
-  updateStats(text: string) {
-    this.charCount.set(text.length);
-    this.lineCount.set(text.split('\n').length);
+  updateStats(content: string) {
+    this.charCount.set(content.length);
+    this.lineCount.set(content.split('\n').length);
   }
   
   saveChanges() {
@@ -66,7 +67,7 @@ export class DocumentEditor {
     const content = this.editorContent();
     
     if (!id) {
-      this.toast.show('No template selected', 'warn');
+      this.toast.warn('No template selected');
       return;
     }
     
@@ -75,49 +76,29 @@ export class DocumentEditor {
     this.api.updateTemplateContent(id, content).subscribe({
       next: () => {
         this.content.set(content);
-        this.toast.show('Template saved successfully', 'success');
+        this.toast.success('Saved');
         this.saving.set(false);
       },
       error: () => {
-        this.toast.show('Save failed', 'error');
+        this.toast.error('Save failed');
         this.saving.set(false);
       }
     });
   }
   
-  generateDocument() {
-    const id = this.templateId();
-    const phs = this.placeholders();
-    
-    if (!id) {
-      this.toast.show('No template selected', 'warn');
+  openGenerateModal() {
+    if (!this.templateId()) {
+      this.toast.warn('No template selected');
       return;
     }
-    
-    this.generating.set(true);
-    
-    const data: Record<string, string> = {};
-    for (const ph of phs) {
-      const lower = ph.toLowerCase();
-      if (lower.includes('date')) data[ph] = new Date().toLocaleDateString();
-      else if (lower.includes('name')) data[ph] = 'Sample Name';
-      else if (lower.includes('email')) data[ph] = 'sample@example.com';
-      else if (lower.includes('company')) data[ph] = 'Acme Corp';
-      else data[ph] = `[${ph}]`;
-    }
-    
-    this.api.generateDocument({ template_id: id, data }).subscribe({
-      next: (res) => {
-        if (res.docx_url) {
-          window.open('http://localhost:8000' + res.docx_url, '_blank');
-          this.toast.show('Document generated successfully', 'success');
-        }
-        this.generating.set(false);
-      },
-      error: () => {
-        this.toast.show('Generation failed', 'error');
-        this.generating.set(false);
-      }
-    });
+    this.toast.info('Generate feature coming soon');
+  }
+  
+  closeGenerateModal() {
+    this.showGenerateModal.set(false);
+  }
+  
+  refreshPreview() {
+    this.toast.info('Refreshing preview...');
   }
 }

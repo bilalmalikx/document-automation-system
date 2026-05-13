@@ -1,25 +1,23 @@
-<div class="panel3">
-  <div class="preview-toolbar">
-    <span class="preview-url">{{ previewUrl() }}</span>
-    <div class="preview-refresh" (click)="forceRefresh()" title="Refresh preview">
-      ↻
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <div class="dot live"></div>
+      Live Preview
     </div>
+    <button class="refresh-btn" (click)="forceRefresh()">↻</button>
   </div>
-  <div class="preview-wrap">
-    <iframe #previewFrame class="preview-frame" title="Live Preview" sandbox="allow-same-origin allow-scripts"></iframe>
-    
+  <div class="panel-body preview-body">
+    <iframe #previewFrame class="preview-frame" title="Preview" sandbox="allow-same-origin allow-scripts"></iframe>
     @if (loading()) {
-      <div class="prev-overlay">
-        <div class="prev-ring"></div>
-        <div class="prev-overlay-msg">Rendering preview...</div>
+      <div class="preview-overlay">
+        <div class="spinner"></div>
+        <p>Rendering preview...</p>
       </div>
     }
-    
     @if (!content() && !loading()) {
-      <div class="preview-empty">
-        <div class="preview-empty-ring">🖥</div>
-        <div class="preview-empty-txt">Live Preview</div>
-        <div class="preview-empty-sub">Select a template to begin</div>
+      <div class="empty-state">
+        <div class="empty-icon">🖥</div>
+        <p>Preview will appear here</p>
       </div>
     }
   </div>

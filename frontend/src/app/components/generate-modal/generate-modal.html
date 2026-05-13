@@ -1,0 +1,23 @@
+<div class="modal-overlay" (click)="close.emit()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>⚡ Generate Document</h3>
+      <button class="close-btn" (click)="close.emit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Fill in the values for placeholders:</p>
+      @for (ph of placeholders(); track ph) {
+        <div class="form-field">
+          <label>{{ ph.replace('_', ' ') }}</label>
+          <input type="text" [(ngModel)]="formData[ph]" placeholder="Enter {{ ph }}" />
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="close.emit()">Cancel</button>
+      <button class="btn-generate" (click)="generate()" [disabled]="generating()">
+        {{ generating() ? 'Generating...' : 'Generate' }}
+      </button>
+    </div>
+  </div>
+</div>

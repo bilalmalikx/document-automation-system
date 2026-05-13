@@ -1,29 +1,106 @@
-<div class="header">
-  <div class="header-brand">
-    <div class="brand-icon">⬡</div>
-    <span class="brand-name">Doc<em>Forge</em></span>
-    <span class="brand-version">v2.0</span>
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚒</div>
+    Doc<span>Forge</span>
+  </div>
+  <div class="header-sep"></div>
+
+  <div class="template-select-wrap">
+    <select class="template-select" [(ngModel)]="selectedTemplateId" (change)="onTemplateChange()">
+      <option value="">— Select a template —</option>
+      @for (t of templates(); track t.id) {
+        <option [value]="t.id">{{ t.name }} [{{ t.template_type === 'docx' ? '📄' : '🌐' }} {{ t.template_type.toUpperCase() }}]</option>
+      }
+    </select>
   </div>
 
-  <div class="header-middle">
-    <div class="sel-wrap">
-      <span class="sel-label">Template</span>
-      <div class="sel-outer">
-        <select class="tpl-select" [(ngModel)]="selectedTemplateId" (change)="onTemplateChange()">
-          <option value="">— Choose a template —</option>
-          <option *ngFor="let t of templates()" [value]="t.id">
-            {{ t.name }} [{{ t.template_type }}]
-          </option>
-        </select>
+  <div class="header-actions">
+    <div class="status-pill">
+      <div class="status-dot" [class.loading]="loading()"></div>
+      <span>{{ loading() ? 'Loading...' : 'Ready' }}</span>
+    </div>
+    <button class="btn btn-ghost" (click)="openUploadModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Upload Template
+    </button>
+  </div>
+</header>
+
+<!-- Upload Modal -->
+@if (isUploadModalOpen()) {
+  <div class="modal-overlay" (click)="closeUploadModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📤 Upload Template</h3>
+        <button class="close-btn" (click)="closeUploadModal()">✕</button>
       </div>
-      <div class="ring" [class.on]="loading()"></div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Template Name *</label>
+          <input 
+            type="text" 
+            class="form-input"
+            [(ngModel)]="uploadTemplateName" 
+            placeholder="e.g., NDA Agreement, Employment Contract" />
+        </div>
+        
+        <div class="form-group">
+          <label>Template Type</label>
+          <div class="type-buttons">
+            <button 
+              type="button"
+              class="type-btn" 
+              [class.active]="uploadTemplateType() === 'docx'" 
+              (click)="uploadTemplateType.set('docx')">
+              📄 DOCX (Word)
+            </button>
+            <button 
+              type="button"
+              class="type-btn" 
+              [class.active]="uploadTemplateType() === 'html'" 
+              (click)="uploadTemplateType.set('html')">
+              🌐 HTML
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Template File *</label>
+          <div 
+            class="drop-zone" 
+            (click)="fileInput.click()"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)">
+            <input 
+              type="file" 
+              #fileInput 
+              style="display:none" 
+              (change)="onFileSelected($event)" 
+              [accept]="uploadTemplateType() === 'docx' ? '.docx' : '.html'" />
+            <div class="drop-content">
+              <span class="drop-icon">📁</span>
+              <p>{{ uploadFile() ? uploadFile()!.name : 'Click or drag & drop file here' }}</p>
+              <small>Accepts {{ uploadTemplateType() === 'docx' ? '.docx' : '.html' }} files</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeUploadModal()">Cancel</button>
+        <button class="btn-upload" (click)="uploadTemplate()" [disabled]="isUploading()">
+          @if (isUploading()) {
+            <span>⏳ Uploading...</span>
+          } @else {
+            <span>📤 Upload</span>
+          }
+        </button>
+      </div>
     </div>
   </div>
-
-  <div class="header-right">
-    <div class="status-pill" [class.ok]="status() === 'ok'" [class.err]="status() === 'err'" [class.busy]="status() === 'busy'">
-      <div class="status-dot"></div>
-      <span>{{ statusMessage() }}</span>
-    </div>
-  </div>
-</div>
+}

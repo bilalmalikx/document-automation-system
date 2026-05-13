@@ -1,23 +1,26 @@
-<div class="panel panel2">
-  <div class="line-nums">
-    @for (num of lineNumbers(); track num) {
-      <div class="line-num">{{ num }}</div>
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <div class="dot active"></div>
+      HTML Editor
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="editor-wrap">
+      <div class="line-numbers">
+        @for (num of lineNumbers(); track num) {
+          <span>{{ num }}</span>
+        }
+      </div>
+      <textarea #editor class="editor-textarea" [(ngModel)]="editorContent" (ngModelChange)="onContentChange()" placeholder="Edit your template here..."></textarea>
+    </div>
+    @if (placeholders().length > 0) {
+      <div class="placeholder-bar">
+        <span class="ph-label">Placeholders:</span>
+        @for (ph of placeholders(); track ph) {
+          <span class="ph-tag">{{ ph }}</span>
+        }
+      </div>
     }
   </div>
-  <textarea #editor class="code-area" [(ngModel)]="editorContent" (ngModelChange)="onContentChange()" spellcheck="false" placeholder="// Select a template to start editing"></textarea>
-  
-  @if (!content()) {
-    <div class="panel-empty">
-      <div class="empty-icon">✏️</div>
-      <div class="empty-txt">Editor ready — select template</div>
-    </div>
-  }
-  
-  @if (placeholders().length) {
-    <div class="ph-strip show">
-      @for (ph of placeholders(); track ph) {
-        <span class="ph-tag">{{ ph }}</span>
-      }
-    </div>
-  }
 </div>

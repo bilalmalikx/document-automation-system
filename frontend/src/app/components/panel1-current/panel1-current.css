@@ -1,51 +1,74 @@
 .panel {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  position: relative;
   height: 100%;
+  background: #0a0b0f;
+  border-right: 1px solid #252a3d;
 }
 
-.panel1 {
-  background: rgba(124, 90, 246, 0.02);
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #252a3d;
+  background: #10121a;
 }
 
-.code-area {
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3c8;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+
+.panel-body {
   flex: 1;
-  width: 100%;
+  position: relative;
+  overflow: auto;
+}
+
+.editor-wrap {
+  display: flex;
   height: 100%;
+}
+
+.line-numbers {
+  padding: 12px 8px;
+  background: #0f1117;
+  border-right: 1px solid #252a3d;
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: right;
+  color: #5a607d;
+}
+
+.line-numbers span {
+  display: block;
+}
+
+.editor-textarea {
+  flex: 1;
+  padding: 12px;
   background: transparent;
   border: none;
   outline: none;
-  resize: none;
-  padding: 16px 16px 16px 58px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 1.75;
-  color: rgba(150, 200, 150, 0.75);
-  caret-color: transparent;
-  cursor: default;
-}
-
-.line-nums {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 42px;
-  padding: 16px 8px 16px 0;
-  pointer-events: none;
+  color: #9ca3c8;
   font-family: monospace;
-  font-size: 11px;
-  line-height: 1.75;
-  text-align: right;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: none;
 }
 
-.line-num {
-  color: rgba(232, 234, 242, 0.12);
-}
-
-.panel-empty {
+.empty-state {
   position: absolute;
   inset: 0;
   display: flex;
@@ -53,36 +76,8 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  pointer-events: none;
-  transition: opacity 0.3s;
+  background: #0a0b0f;
+  color: #5a607d;
 }
 
-.panel-empty.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.empty-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  background: rgba(124, 90, 246, 0.1);
-}
-
-.empty-txt {
-  font-size: 12px;
-  color: rgba(232, 234, 242, 0.45);
-}
-
-::-webkit-scrollbar {
-  width: 5px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-}
+.empty-icon { font-size: 32px; opacity: 0.5; }

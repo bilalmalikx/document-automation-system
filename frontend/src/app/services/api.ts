@@ -1,16 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Template, TemplateContent, TemplateSchema } from '../models/template.model';
-import { GenerateRequest, GenerateResponse, PreviewRequest, PreviewResponse, UpdateContentRequest, UpdateContentResponse } from '../models/document.model';
 import { environment } from '../../environments/environment';
+import { Template, TemplateContent, TemplateSchema } from '.././models/template.model';
+import { GenerateRequest, GenerateResponse, PreviewRequest, PreviewResponse } from '../models/document.model';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  // Templates
   getTemplates(): Observable<Template[]> {
     return this.http.get<Template[]>(`${this.apiUrl}/templates/`);
   }
@@ -23,12 +22,15 @@ export class ApiService {
     return this.http.get<TemplateSchema>(`${this.apiUrl}/templates/${id}/schema`);
   }
 
-  updateTemplateContent(id: string, content: string): Observable<UpdateContentResponse> {
-    const body: UpdateContentRequest = { content };
-    return this.http.put<UpdateContentResponse>(`${this.apiUrl}/templates/${id}/content`, body);
+  updateTemplateContent(id: string, content: string): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/templates/${id}/content`, { content });
   }
 
-  // Documents
+  uploadTemplate(formData: FormData, type: 'docx' | 'html'): Observable<any> {
+    const endpoint = type === 'docx' ? '/templates/upload' : '/templates/upload-html';
+    return this.http.post<any>(`${this.apiUrl}${endpoint}`, formData);
+  }
+
   previewDocument(request: PreviewRequest): Observable<PreviewResponse> {
     return this.http.post<PreviewResponse>(`${this.apiUrl}/documents/preview`, request);
   }
@@ -37,7 +39,8 @@ export class ApiService {
     return this.http.post<GenerateResponse>(`${this.apiUrl}/documents/generate`, request);
   }
 
-  getDownloadUrl(filename: string): string {
-    return `${this.apiUrl}/download/docx/${filename}`;
+  getDownloadUrl(path: string): string {
+    if (path.startsWith('http')) return path;
+    return `${this.apiUrl}${path}`;
   }
 }

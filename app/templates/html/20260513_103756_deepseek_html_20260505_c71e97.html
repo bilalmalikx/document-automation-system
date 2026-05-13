@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PDF Studio Pro | Next-Gen PDF Toolkit</title>
+  <!-- Google Fonts + Smooth Icons (Font Awesome via CDN for crisp icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #050b17;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      color: #eef2ff;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Import Inter font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+
+    /* modern design system */
+    :root {
+      --glow-primary: #2dd4bf;
+      --glow-accent: #818cf8;
+      --deep-bg: #020617;
+      --surface: rgba(15, 23, 42, 0.7);
+      --surface-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(45, 212, 191, 0.25);
+      --text-main: #f1f5f9;
+      --text-dim: #94a3b8;
+      --shadow-elevation: 0 25px 45px -12px rgba(0, 0, 0, 0.5);
+      --gradient-primary: linear-gradient(135deg, #2dd4bf 0%, #6366f1 100%);
+      --gradient-soft: linear-gradient(120deg, rgba(45,212,191,0.12), rgba(99,102,241,0.08));
+    }
+
+    /* custom glass morphism + animations */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(45, 212, 191, 0.15);
+      border-radius: 2rem;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(45, 212, 191, 0.4);
+      background: rgba(15, 23, 42, 0.75);
+      transform: translateY(-3px);
+      box-shadow: 0 18px 35px -15px rgba(45, 212, 191, 0.2);
+    }
+
+    /* navigation bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2.5rem;
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.65rem;
+      background: linear-gradient(125deg, #fff, #2dd4bf);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo i {
+      background: none;
+      color: #2dd4bf;
+      font-size: 1.7rem;
+      background-clip: unset;
+      -webkit-background-clip: unset;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #2dd4bf;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 5px 12px rgba(45, 212, 191, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 18px rgba(45, 212, 191, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #2dd4bf;
+      padding: 0.6rem 1.3rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      color: #2dd4bf;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-outline:hover {
+      background: rgba(45, 212, 191, 0.1);
+    }
+
+    /* hero section */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+    }
+
+    .badge {
+      background: rgba(45, 212, 191, 0.12);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #2dd4bf;
+      margin-bottom: 1.3rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero h1 {
+      font-size: 3.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(to right, #ffffff, #a5f3fc, #818cf8);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #cbd5e1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* feature grid */
+    .feature-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.8rem;
+      padding: 2rem 2rem;
+    }
+
+    .feature-item {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 1.8rem;
+      padding: 1rem 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      transition: all 0.2s;
+    }
+
+    .feature-item i {
+      font-size: 1.7rem;
+      color: #2dd4bf;
+    }
+
+    /* tools section modern */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 2rem 0 1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .tools-modern {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      padding: 1rem 2rem 3rem;
+    }
+
+    .tool-card {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.8rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(45, 212, 191, 0.1);
+    }
+
+    .tool-card i {
+      font-size: 1.2rem;
+      color: #2dd4bf;
+    }
+
+    .tool-card:hover {
+      background: #2dd4bf20;
+      transform: translateY(-3px);
+      border-color: #2dd4bf;
+    }
+
+    /* upload zone */
+    .upload-zone {
+      max-width: 750px;
+      margin: 2rem auto;
+      background: rgba(12, 18, 34, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      padding: 2rem;
+      border: 1px solid rgba(45, 212, 191, 0.25);
+    }
+
+    .drop-area {
+      border: 2px dashed rgba(45, 212, 191, 0.6);
+      border-radius: 1.5rem;
+      padding: 2.5rem 1rem;
+      text-align: center;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .drop-area i {
+      font-size: 2.5rem;
+      color: #2dd4bf;
+      margin-bottom: 10px;
+    }
+
+    .drop-area p {
+      margin: 8px 0;
+    }
+
+    .drop-area.active {
+      border-color: #2dd4bf;
+      background: #2dd4bf08;
+    }
+
+    .progress-wrapper {
+      margin-top: 1.5rem;
+    }
+
+    .progress-bar-bg {
+      background: #1e293b;
+      border-radius: 40px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #2dd4bf, #818cf8);
+      border-radius: 40px;
+      transition: width 0.25s ease;
+    }
+
+    /* pricing cards premium */
+    .pricing-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .pricing-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      padding: 2rem;
+      width: 260px;
+      text-align: center;
+      border: 1px solid rgba(45, 212, 191, 0.25);
+      transition: 0.25s;
+    }
+
+    .pricing-card.popular {
+      border: 1px solid #2dd4bf;
+      box-shadow: 0 0 15px rgba(45, 212, 191, 0.3);
+    }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0.7rem 0;
+      color: #2dd4bf;
+    }
+
+    /* testimonials */
+    .testimonial-slider {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .testi-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      width: 280px;
+      border: 1px solid rgba(45, 212, 191, 0.2);
+    }
+
+    .stars i {
+      color: #facc15;
+      font-size: 0.8rem;
+    }
+
+    /* footer */
+    .footer-new {
+      text-align: center;
+      padding: 2.5rem;
+      border-top: 1px solid rgba(45, 212, 191, 0.2);
+      color: #94a3b8;
+      margin-top: 2rem;
+    }
+
+    /* responsive */
+    @media (max-width: 700px) {
+      .navbar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 1rem;
+      }
+      .hero h1 {
+        font-size: 2.3rem;
+      }
+      .feature-item {
+        padding: 0.6rem 1.2rem;
+      }
+    }
+
+    /* animation */
+    @keyframes fadeSlide {
+      0% { opacity: 0; transform: translateY(18px);}
+      100% { opacity: 1; transform: translateY(0);}
+    }
+    .animate-on-scroll {
+      animation: fadeSlide 0.6s ease forwards;
+    }
+
+    button, .tool-card, .feature-item, .pricing-card {
+      cursor: pointer;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0f172a;
+      backdrop-filter: blur(16px);
+      border-left: 4px solid #2dd4bf;
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      color: white;
+      z-index: 2000;
+      animation: fadeSlide 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">
+    <i class="fas fa-file-pdf"></i> 
+    <span>PDF Studio</span>
+  </div>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Features</a>
+    <a href="#">Pricing</a>
+    <a href="#">Enterprise</a>
+  </div>
+  <div>
+    <button class="btn-primary" id="openCtaBtn">Get Started <i class="fas fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<main>
+  <div class="hero">
+    <div class="badge"><i class="fas fa-bolt"></i> Next-gen PDF Intelligence</div>
+    <h1>Convert, Merge, Sign & Secure<br>All-in-One PDF Powerhouse</h1>
+    <p>Lightning fast, bank-level security, and seamless cloud workflow. Trusted by 20k+ teams.</p>
+    <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+      <button class="btn-primary" id="heroProcessBtn"><i class="fas fa-play"></i> Start Processing</button>
+      <button class="btn-outline"><i class="fas fa-gem"></i> See Live Demo</button>
+    </div>
+  </div>
+
+  <!-- Features row modern -->
+  <div class="feature-grid">
+    <div class="feature-item"><i class="fas fa-bolt"></i> <span>Ultra-Fast</span></div>
+    <div class="feature-item"><i class="fas fa-lock"></i> <span>TLS Encrypted</span></div>
+    <div class="feature-item"><i class="fas fa-cloud-upload-alt"></i> <span>Cloud Ready</span></div>
+    <div class="feature-item"><i class="fas fa-robot"></i> <span>AI OCR</span></div>
+  </div>
+
+  <!-- Tools -->
+  <h2 class="section-title"><i class="fas fa-tools"></i> Smart PDF Tools</h2>
+  <div class="tools-modern">
+    <div class="tool-card" data-tool="merge"><i class="fas fa-object-group"></i> Merge</div>
+    <div class="tool-card" data-tool="split"><i class="fas fa-cut"></i> Split</div>
+    <div class="tool-card" data-tool="compress"><i class="fas fa-compress-alt"></i> Compress</div>
+    <div class="tool-card" data-tool="image"><i class="fas fa-images"></i> PDF to Image</div>
+    <div class="tool-card" data-tool="edit"><i class="fas fa-pen-fancy"></i> Edit PDF</div>
+  </div>
+
+  <!-- Dynamic upload zone -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="drop-area" id="dropArea">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p><strong>Drag & Drop PDF here</strong> or click to browse</p>
+      <p style="font-size: 0.75rem; color: #a0aec0;">Supports up to 50MB, secure processing</p>
+      <input type="file" id="fileInput" accept="application/pdf" style="display: none;">
+    </div>
+    <div class="progress-wrapper" id="progressWrap" style="display: none;">
+      <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+      <p style="font-size: 0.8rem; margin-top: 8px;" id="progressStatus">Uploading...</p>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.2rem;">
+      <button class="btn-primary" id="processFileBtn"><i class="fas fa-cogs"></i> Process PDF</button>
+      <button class="btn-outline" id="resetUploadBtn"><i class="fas fa-sync-alt"></i> Reset</button>
+    </div>
+    <div id="selectedFileName" style="margin-top: 12px; font-size: 0.8rem; text-align: center; color: #94a3b8;"></div>
+  </div>
+
+  <!-- Pricing section -->
+  <h2 class="section-title"><i class="fas fa-tag"></i> Flexible Plans</h2>
+  <div class="pricing-flex">
+    <div class="pricing-card">
+      <h3>Essential</h3>
+      <div class="price">$0</div>
+      <p>Core tools, 5MB max</p>
+      <p style="margin-top: 12px;">✅ Merge & Split</p>
+      <p>✅ Basic compression</p>
+      <button class="btn-outline" style="margin-top: 20px;">Get Free</button>
+    </div>
+    <div class="pricing-card popular">
+      <h3>Pro <i class="fas fa-crown" style="color:#facc15;"></i></h3>
+      <div class="price">$9<span style="font-size:1rem;">/mo</span></div>
+      <p>Unlimited processing, OCR, batch</p>
+      <p>✅ Advanced tools</p>
+      <p>✅ eSign + priority</p>
+      <button class="btn-primary" style="margin-top: 20px;">Upgrade Now</button>
+    </div>
+    <div class="pricing-card">
+      <h3>Enterprise</h3>
+      <div class="price">$29</div>
+      <p>API + White-label, SSO</p>
+      <p>✅ Dedicated support</p>
+      <p>✅ Custom workflows</p>
+      <button class="btn-outline">Contact Sales</button>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <h2 class="section-title"><i class="fas fa-comment-dots"></i> Loved by creators</h2>
+  <div class="testimonial-slider">
+    <div class="testi-card">
+      <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p style="margin: 10px 0;">"Best PDF experience ever — fast, beautiful UI, and reliable conversions."</p>
+      <p style="font-weight:600;">— Jessica M. / Product Lead</p>
+    </div>
+    <div class="testi-card">
+      <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+      <p style="margin: 10px 0;">"The compression tool saved me hours of storage optimization. Love it!"</p>
+      <p style="font-weight:600;">— David K. / Freelancer</p>
+    </div>
+    <div class="testi-card">
+      <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p style="margin: 10px 0;">"Modern design & super secure. My go-to PDF suite for business."</p>
+      <p style="font-weight:600;">— Sophia L. / CTO</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer-new">
+  <p><i class="far fa-copyright"></i> 2026 PDF Studio Pro — Next-generation document workflow. <span style="color:#2dd4bf;">#PDFredefined</span></p>
+</footer>
+
+<script>
+  // interactive upload, progress simulation, tooltips & production feel
+
+  const dropArea = document.getElementById('dropArea');
+  const fileInput = document.getElementById('fileInput');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressStatus = document.getElementById('progressStatus');
+  const selectedFileNameSpan = document.getElementById('selectedFileName');
+  const resetBtn = document.getElementById('resetUploadBtn');
+  const processBtn = document.getElementById('processFileBtn');
+
+  let currentFile = null;
+
+  // Helper toast
+  function showToast(message, isError = false) {
+    let toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerHTML = `<i class="fas ${isError ? 'fa-circle-exclamation' : 'fa-check-circle'}"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2800);
+  }
+
+  // Reset UI
+  function resetUploadUI() {
+    currentFile = null;
+    selectedFileNameSpan.innerText = '';
+    progressWrap.style.display = 'none';
+    progressFill.style.width = '0%';
+    if (fileInput) fileInput.value = '';
+    showToast('Upload reset. You can select a new PDF file.', false);
+  }
+
+  // simulate progress animation
+  function simulateProgress(callback) {
+    progressWrap.style.display = 'block';
+    let width = 0;
+    progressFill.style.width = '0%';
+    progressStatus.innerText = 'Processing secure stream...';
+    const interval = setInterval(() => {
+      width += Math.floor(Math.random() * 12) + 5;
+      if (width >= 100) {
+        width = 100;
+        progressFill.style.width = '100%';
+        clearInterval(interval);
+        progressStatus.innerText = 'Finalizing PDF transformation';
+        setTimeout(() => {
+          if (callback) callback();
+        }, 300);
+      } else {
+        progressFill.style.width = width + '%';
+      }
+    }, 120);
+  }
+
+  // actual simulation of PDF action
+  function processPDF() {
+    if (!currentFile) {
+      showToast('Please select or drop a PDF file first.', true);
+      return;
+    }
+    if (!currentFile.name.toLowerCase().endsWith('.pdf')) {
+      showToast('Only PDF files are supported for processing.', true);
+      return;
+    }
+    simulateProgress(() => {
+      // success simulation
+      showToast(`✅ Success! "${currentFile.name}" processed via smart engine.`);
+      progressStatus.innerText = 'Completed! Ready to download';
+      setTimeout(() => {
+        progressWrap.style.display = 'none';
+        progressFill.style.width = '0%';
+      }, 1800);
+      // additional micro interactions
+    });
+  }
+
+  // handle file selection
+  function handleFile(file) {
+    if (!file) return;
+    if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+      showToast('Invalid format. Please upload a valid PDF document.', true);
+      return;
+    }
+    currentFile = file;
+    selectedFileNameSpan.innerHTML = `<i class="fas fa-file-pdf"></i> Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    showToast(`PDF "${file.name}" ready for processing`, false);
+    progressWrap.style.display = 'none';
+    progressFill.style.width = '0%';
+  }
+
+  // drop zone handlers
+  dropArea.addEventListener('click', () => fileInput.click());
+  dropArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropArea.classList.add('active');
+  });
+  dropArea.addEventListener('dragleave', () => {
+    dropArea.classList.remove('active');
+  });
+  dropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropArea.classList.remove('active');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    } else {
+      showToast('Drop failed, try clicking to upload.', true);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleFile(e.target.files[0]);
+    }
+  });
+
+  processBtn.addEventListener('click', processPDF);
+  resetBtn.addEventListener('click', resetUploadUI);
+
+  // tool card alerts (demo interactions)
+  const toolCards = document.querySelectorAll('.tool-card');
+  toolCards.forEach(tool => {
+    tool.addEventListener('click', (e) => {
+      const toolName = tool.getAttribute('data-tool') || tool.innerText.trim();
+      showToast(`✨ ${toolName} tool is ready — upload a PDF to get started`, false);
+    });
+  });
+
+  // cta buttons smooth scroll or toast demo
+  const heroProcess = document.getElementById('heroProcessBtn');
+  const openCta = document.getElementById('openCtaBtn');
+  heroProcess?.addEventListener('click', () => {
+    document.getElementById('uploadZone')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('Drop your PDF in the upload area 👇', false);
+  });
+  openCta?.addEventListener('click', () => {
+    document.getElementById('uploadZone')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Intersection Observer for subtle fade in animation
+  const sections = document.querySelectorAll('.feature-grid, .tools-modern, .upload-zone, .pricing-flex, .testimonial-slider');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0px)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  sections.forEach(sec => {
+    sec.style.opacity = '0';
+    sec.style.transform = 'translateY(20px)';
+    sec.style.transition = 'opacity 0.6s ease, transform 0.5s ease';
+    observer.observe(sec);
+  });
+
+  // initial values
+  window.addEventListener('load', () => {
+    // preanimate hero badge etc
+    showToast('⚡ PDF Studio Pro ready — drag & drop your PDF', false);
+  });
+</script>
+</body>
+</html>

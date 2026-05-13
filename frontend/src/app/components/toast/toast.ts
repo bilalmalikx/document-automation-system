@@ -1,14 +1,18 @@
 import { Component, inject } from '@angular/core';
-import { ToastService } from '../../services/toast';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-toast',
-  imports: [CommonModule,FormsModule],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './toast.html',
-  styleUrl: './toast.css',
+  styleUrls: ['./toast.css']
 })
 export class Toast {
-toastService = inject(ToastService);
+  toastService = inject(ToastService);
+  
+  getToasts() {
+    return this.toastService.getToasts()();
+  }
 }
