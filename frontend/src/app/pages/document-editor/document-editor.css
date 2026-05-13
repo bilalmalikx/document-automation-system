@@ -80,7 +80,147 @@
   box-shadow: 0 0 12px rgba(245, 200, 66, 0.2);
 }
 
-.btn-save:disabled, .btn-generate:disabled {
+.btn-save:disabled, .btn-generate:disabled, .btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #10121a;
+  border: 1px solid #252a3d;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #252a3d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #e8eaf6;
+  font-size: 18px;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3c8;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #f87171;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-desc {
+  font-size: 13px;
+  color: #9ca3c8;
+  margin-bottom: 16px;
+}
+
+.warning-box {
+  background: #2a2210;
+  border: 1px solid #f5c842;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f5c842;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.form-field {
+  margin-bottom: 14px;
+}
+
+.form-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #9ca3c8;
+  text-transform: capitalize;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #1a1c24;
+  border: 1px solid #252a3d;
+  border-radius: 8px;
+  color: #e8eaf6;
+  outline: none;
+  font-size: 13px;
+}
+
+.form-field input:focus {
+  border-color: #4f6ef7;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #252a3d;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-cancel {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid #252a3d;
+  border-radius: 8px;
+  color: #9ca3c8;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: #1a1c24;
+}
+
+.btn-generate-modal {
+  padding: 8px 20px;
+  background: #f5c842;
+  border: none;
+  border-radius: 8px;
+  color: #1a1c24;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-generate-modal:hover:not(:disabled) {
+  background: #ffd55a;
+  transform: translateY(-1px);
+}
+
+.btn-generate-modal:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

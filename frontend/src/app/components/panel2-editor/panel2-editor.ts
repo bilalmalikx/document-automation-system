@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-panel2-editor',
   imports: [CommonModule, FormsModule],
   templateUrl: './panel2-editor.html',
-  styleUrl: './panel2-editor.css',
+  styleUrl: './panel2-editor.css'
 })
 export class Panel2Editor {
   @ViewChild('editor') editorRef!: ElementRef<HTMLTextAreaElement>;
@@ -45,13 +45,20 @@ export class Panel2Editor {
   }
   
   extractPlaceholders(text: string) {
-    const regex = /\{\{\s*([^}]+?)\s*\}\}/g;
+    console.log('Extracting placeholders from:', text); // Debug log
+    
+    const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
     const found = new Set<string>();
     let match;
+    
     while ((match = regex.exec(text)) !== null) {
+      console.log('Found placeholder:', match[1]); // Debug log
       found.add(match[1].trim());
     }
+    
     const placeholders = Array.from(found);
+    console.log('All placeholders:', placeholders); // Debug log
+    
     this.placeholders.set(placeholders);
     this.placeholdersChange.emit(placeholders);
   }

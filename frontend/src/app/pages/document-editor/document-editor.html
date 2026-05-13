@@ -14,12 +14,14 @@
   
   <div class="bottom-bar">
     <div class="stats">
-      {{ charCount() }} chars · {{ lineCount() }} lines · {{ placeholders().length }} placeholders
+      📝 {{ charCount() }} chars · {{ lineCount() }} lines · 🔖 {{ placeholders().length }} placeholders
     </div>
     <div class="actions">
-      <button class="btn-refresh" (click)="refreshPreview()">↻ Refresh Preview</button>
+      <button class="btn-refresh" (click)="refreshPreview()">
+        🔄 Refresh Preview
+      </button>
       <button class="btn-save" (click)="saveChanges()" [disabled]="saving()">
-        {{ saving() ? 'Saving...' : '💾 Save Changes' }}
+        💾 {{ saving() ? 'Saving...' : 'Save Changes' }}
       </button>
       <button class="btn-generate" (click)="openGenerateModal()">
         ⚡ Generate Document
@@ -28,10 +30,38 @@
   </div>
   
   <app-toast />
+  
+  <!-- Generate Modal -->
   @if (showGenerateModal()) {
-    <app-generate-modal 
-      [templateId]="templateId()"
-      [placeholders]="placeholders()"
-      (close)="closeGenerateModal()" />
+    <div class="modal-overlay" (click)="closeGenerateModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>⚡ Generate Document</h3>
+          <button class="close-btn" (click)="closeGenerateModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Fill in the values for {{ placeholders().length }} placeholders:</p>
+          
+          @if (placeholders().length === 0) {
+            <div class="warning-box">
+              ⚠️ No placeholders found in this template.
+            </div>
+          }
+          
+          @for (ph of placeholders(); track ph) {
+            <div class="form-field">
+              <label>{{ ph.replace(/_/g, ' ') }}</label>
+              <input type="text" [(ngModel)]="formData[ph]" placeholder="Enter {{ ph }}" />
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeGenerateModal()">Cancel</button>
+          <button class="btn-generate-modal" (click)="generateDocument()" [disabled]="generating()">
+            {{ generating() ? '⏳ Generating...' : '🚀 Generate' }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </div>

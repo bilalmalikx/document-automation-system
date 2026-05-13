@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Header } from '../../components/header/header';
 import { Panel1Current } from '../../components/panel1-current/panel1-current';
 import { Panel2Editor } from '../../components/panel2-editor/panel2-editor';
@@ -7,15 +8,14 @@ import { Panel3Preview } from '../../components/panel3-preview/panel3-preview';
 import { Toast } from '../../components/toast/toast';
 import { ApiService } from '../../services/api';
 import { ToastService } from '../../services/toast';
-import { GenerateModal } from '../../components/generate-modal/generate-modal';
 
 @Component({
   selector: 'app-document-editor',
-  imports: [CommonModule, Header, Panel1Current, Panel2Editor, Panel3Preview, Toast, GenerateModal],
+  imports: [CommonModule, FormsModule, Header, Panel1Current, Panel2Editor, Panel3Preview, Toast],
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.css'
 })
-export class DocumentEditor {
+export class DocumentEditor implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   
@@ -28,6 +28,25 @@ export class DocumentEditor {
   showGenerateModal = signal(false);
   charCount = signal(0);
   lineCount = signal(0);
+  formData: Record<string, string> = {};
+  
+  ngOnInit() {
+    this.loadTemplates();
+  }
+  
+  loadTemplates() {
+    this.api.getTemplates().subscribe({
+      next: (templates) => {
+        if (templates.length > 0) {
+          this.templateId.set(templates[0].id);
+          this.loadTemplateContent(templates[0].id);
+        }
+      },
+      error: () => {
+        this.toast.error('Failed to load templates');
+      }
+    });
+  }
   
   onTemplateSelected(id: string) {
     this.templateId.set(id);
@@ -55,6 +74,25 @@ export class DocumentEditor {
   
   onPlaceholdersChange(phs: string[]) {
     this.placeholders.set(phs);
+    this.initFormData(phs);
+  }
+  
+  initFormData(phs: string[]) {
+    this.formData = {};
+    for (const ph of phs) {
+      const lower = ph.toLowerCase();
+      if (lower.includes('date')) {
+        this.formData[ph] = new Date().toLocaleDateString();
+      } else if (lower.includes('name')) {
+        this.formData[ph] = 'Sample Name';
+      } else if (lower.includes('email')) {
+        this.formData[ph] = 'sample@example.com';
+      } else if (lower.includes('company')) {
+        this.formData[ph] = 'Acme Corporation';
+      } else {
+        this.formData[ph] = '';
+      }
+    }
   }
   
   updateStats(content: string) {
@@ -76,7 +114,7 @@ export class DocumentEditor {
     this.api.updateTemplateContent(id, content).subscribe({
       next: () => {
         this.content.set(content);
-        this.toast.success('Saved');
+        this.toast.success('Saved successfully');
         this.saving.set(false);
       },
       error: () => {
@@ -91,14 +129,47 @@ export class DocumentEditor {
       this.toast.warn('No template selected');
       return;
     }
-    this.toast.info('Generate feature coming soon');
+    this.showGenerateModal.set(true);
   }
   
   closeGenerateModal() {
     this.showGenerateModal.set(false);
   }
   
+  generateDocument() {
+    const id = this.templateId();
+    
+    if (!id) {
+      this.toast.error('No template selected');
+      return;
+    }
+    
+    this.generating.set(true);
+    
+    this.api.generateDocument({ 
+      template_id: id, 
+      data: this.formData 
+    }).subscribe({
+      next: (res) => {
+        if (res.docx_url) {
+          const downloadUrl = this.api.getDownloadUrl(res.docx_url);
+          window.open(downloadUrl, '_blank');
+          this.toast.success('Document generated!');
+        }
+        this.closeGenerateModal();
+        this.generating.set(false);
+      },
+      error: (err) => {
+        this.toast.error('Generation failed: ' + (err.error?.detail || err.message));
+        this.generating.set(false);
+      }
+    });
+  }
+  
   refreshPreview() {
-    this.toast.info('Refreshing preview...');
+    const content = this.editorContent();
+    if (content) {
+      this.toast.info('Refreshing preview...');
+    }
   }
 }
