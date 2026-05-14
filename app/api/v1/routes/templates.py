@@ -57,74 +57,6 @@ def get_template_schema(template_id: UUID, db: Session = Depends(get_db)):
 
 
 # ============ GET TEMPLATE CONTENT (for Panel 1 & 2) ============
-@router.get("/{template_id}/content")
-def get_template_content(template_id: UUID, db: Session = Depends(get_db)):
-    template = db.query(Template).filter(Template.id == template_id).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-    
-    content = ""
-    
-    if template.template_type == "html" and template.html_template_path:
-        file_path = Path(template.html_template_path)
-        if file_path.exists():
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-    
-    elif template.template_type == "docx" and template.docx_template_path:
-        file_path = Path(template.docx_template_path)
-        if file_path.exists():
-            try:
-                from docx import Document
-                doc = Document(file_path)
-                
-                # Extract full text from DOCX
-                full_text = []
-                
-                # Get all paragraphs
-                for para in doc.paragraphs:
-                    if para.text.strip():
-                        full_text.append(para.text)
-                
-                # Get text from tables
-                for table in doc.tables:
-                    for row in table.rows:
-                        row_text = []
-                        for cell in row.cells:
-                            cell_text = ' '.join([p.text for p in cell.paragraphs if p.text.strip()])
-                            if cell_text:
-                                row_text.append(cell_text)
-                        if row_text:
-                            full_text.append(' | '.join(row_text))
-                
-                content = '\n\n'.join(full_text)
-                
-                # If no text found, show placeholders from database
-                if not content or len(content.strip()) < 10:
-                    fields = db.query(TemplateField).filter(
-                        TemplateField.template_id == template_id
-                    ).order_by(TemplateField.display_order).all()
-                    
-                    if fields:
-                        content = f"📄 {template.name}\n\n"
-                        content += "This DOCX template contains the following placeholders:\n\n"
-                        for field in fields:
-                            content += f"  • {{{{ {field.placeholder_name} }}}} : {field.field_label}\n"
-                        content += "\n✅ Click 'Generate Document' to fill these values."
-                    else:
-                        content = f"DOCX Template: {template.name}\n\nNo placeholders detected."
-                        
-            except Exception as e:
-                print(f"Error reading DOCX: {e}")
-                content = f"DOCX Template: {template.name}\n\nError reading file. Please re-upload."
-    
-    return {
-        "template_id": template_id,
-        "name": template.name,
-        "template_type": template.template_type,
-        "content": content
-    }
-
 
 @router.get("/{template_id}/content")
 def get_template_content(template_id: UUID, db: Session = Depends(get_db)):
@@ -144,12 +76,18 @@ def get_template_content(template_id: UUID, db: Session = Depends(get_db)):
         file_path = Path(template.docx_template_path)
         if file_path.exists():
             try:
+                # Try to import and use converter
+                import sys
+                sys.path.append(str(Path(__file__).parent.parent.parent))
                 from app.services.docx_to_html import DocxToHtmlConverter
-                # Convert DOCX to HTML/CSS
                 content = DocxToHtmlConverter.convert(file_path)
+                print(f"✅ Successfully converted DOCX to HTML")
+            except ImportError as e:
+                print(f"Import error: {e}")
+                content = f"<p>Converter not found. Please create docx_to_html.py</p>"
             except Exception as e:
-                print(f"Error converting DOCX to HTML: {e}")
-                content = f"<p>Error loading template: {str(e)}</p>"
+                print(f"Conversion error: {e}")
+                content = f"<p>Error converting DOCX: {str(e)}</p>"
     
     return {
         "template_id": template_id,
